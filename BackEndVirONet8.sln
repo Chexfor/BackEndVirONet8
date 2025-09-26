@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36414.22 d17.14
+VisualStudioVersion = 17.14.36414.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackEndVirONet8", "BackEndVirONet8.csproj", "{F9B9E03B-4237-490C-AD11-A0B6DC19ADBE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontEndVirOBlazor", "..\FrontEndVirOBlazor\FrontEndVirOBlazor\FrontEndVirOBlazor.csproj", "{CDD33599-9350-46CB-92EF-51FCD5DA12DA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontEndVirOBlazor", "FrontEndVirOBlazor\FrontEndVirOBlazor\FrontEndVirOBlazor.csproj", "{69E93E64-A236-5449-2D2C-02AC08331712}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontEndVirOBlazor.Client", "..\FrontEndVirOBlazor\FrontEndVirOBlazor.Client\FrontEndVirOBlazor.Client.csproj", "{A93EFE21-AEFF-406D-B5EB-8CCCB23F7406}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontEndVirOBlazor.Client", "FrontEndVirOBlazor\FrontEndVirOBlazor.Client\FrontEndVirOBlazor.Client.csproj", "{6689EF3E-D947-EE88-A08A-67096F3CE86C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,14 +19,14 @@ Global
 		{F9B9E03B-4237-490C-AD11-A0B6DC19ADBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9B9E03B-4237-490C-AD11-A0B6DC19ADBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F9B9E03B-4237-490C-AD11-A0B6DC19ADBE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CDD33599-9350-46CB-92EF-51FCD5DA12DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CDD33599-9350-46CB-92EF-51FCD5DA12DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CDD33599-9350-46CB-92EF-51FCD5DA12DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CDD33599-9350-46CB-92EF-51FCD5DA12DA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A93EFE21-AEFF-406D-B5EB-8CCCB23F7406}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A93EFE21-AEFF-406D-B5EB-8CCCB23F7406}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A93EFE21-AEFF-406D-B5EB-8CCCB23F7406}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A93EFE21-AEFF-406D-B5EB-8CCCB23F7406}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69E93E64-A236-5449-2D2C-02AC08331712}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69E93E64-A236-5449-2D2C-02AC08331712}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69E93E64-A236-5449-2D2C-02AC08331712}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69E93E64-A236-5449-2D2C-02AC08331712}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6689EF3E-D947-EE88-A08A-67096F3CE86C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6689EF3E-D947-EE88-A08A-67096F3CE86C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6689EF3E-D947-EE88-A08A-67096F3CE86C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6689EF3E-D947-EE88-A08A-67096F3CE86C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
