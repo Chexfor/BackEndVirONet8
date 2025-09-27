@@ -34,11 +34,7 @@ namespace BackEndVirONet8.Infrastructure.Persistence
                 .WithMany(p => p.PersonaDeportes)
                 .HasForeignKey(pd => pd.PersonaId);
 
-            b.Entity<PersonaDeporte>()
-                .HasOne(pd => pd.Deporte)
-                .WithMany(d => d.PersonaDeportes)
-                .HasForeignKey(pd => pd.DeporteId);
-
+       
             b.Entity<Deporte>().HasData(
                 new Deporte { Id = 1, Nombre = "Fútbol" },
                 new Deporte { Id = 2, Nombre = "Básquetbol" },

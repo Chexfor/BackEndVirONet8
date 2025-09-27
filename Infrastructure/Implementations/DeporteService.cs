@@ -39,7 +39,6 @@ namespace BackEndVirONet8.Infrastructure.Implementations
 
         public async Task ActualizarAsync(Deporte deporte)
         {
-            // Validación de unicidad de nombre (excepto el mismo registro)
             var existentes = await _repo.GetAllAsync();
             if (existentes.Any(d => d.Id != deporte.Id && d.Nombre.ToLower() == deporte.Nombre.ToLower()))
                 throw new ArgumentException("Ya existe un deporte con ese nombre.");
@@ -52,6 +51,14 @@ namespace BackEndVirONet8.Infrastructure.Implementations
 
         public async Task EliminarAsync(int id)
         {
+            // Verifica si el deporte está asignado a alguna persona
+            var deporte = await _repo.GetByIdAsync(id);
+            if (deporte == null)
+                throw new ArgumentException("Deporte no encontrado.");
+
+            if (deporte.PersonaDeportes != null && deporte.PersonaDeportes.Any())
+                throw new InvalidOperationException("No se puede eliminar el deporte porque está asignado a una o más personas.");
+
             await _repo.DeleteAsync(id);
         }
     }

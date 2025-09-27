@@ -24,9 +24,8 @@ namespace BackEndVirONet8.Infrastructure.Repositories
         public async Task<Deporte?> GetByIdAsync(int id)
         {
             return await _context.Deportes
-                .Include(p => p.PersonaDeportes)
-                    .ThenInclude(pd => pd.Persona)
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .Include(d => d.PersonaDeportes)
+                .FirstOrDefaultAsync(d => d.Id == id);
         }
 
         public async Task AddAsync(Deporte deporte)
@@ -37,7 +36,12 @@ namespace BackEndVirONet8.Infrastructure.Repositories
 
         public async Task UpdateAsync(Deporte deporte)
         {
-            _context.Deportes.Update(deporte);
+            var original = await _context.Deportes.FindAsync(deporte.Id);
+            if (original == null)
+                throw new ArgumentException("Deporte no encontrado.");
+
+            original.Nombre = deporte.Nombre;
+
             await _context.SaveChangesAsync();
         }
 

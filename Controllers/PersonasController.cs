@@ -25,16 +25,24 @@ namespace BackEndVirONet8.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            var persona = await _service.ObtenerPorIdAsync(id);
+            var persona = await _service.ObtenerDtoPorIdAsync(id);
             if (persona == null) return NotFound();
             return Ok(persona);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] Persona persona)
+        public async Task<IActionResult> Post([FromBody] PersonaCreateDto dto)
         {
             try
             {
+                var persona = new Persona
+                {
+                    Nombre = dto.Nombre,
+                    PrimerApellido = dto.PrimerApellido,
+                    SegundoApellido = dto.SegundoApellido,
+                    FechaNacimiento = dto.FechaNacimiento,
+                    Sexo = dto.Sexo
+                };
                 await _service.CrearAsync(persona);
                 return CreatedAtAction(nameof(Get), new { id = persona.Id }, persona);
             }
@@ -57,6 +65,20 @@ namespace BackEndVirONet8.Controllers
         {
             await _service.EliminarAsync(id);
             return NoContent();
+        }
+
+        [HttpPost("{id}/deportes")]
+        public async Task<IActionResult> AsociarDeportes(int id, [FromBody] PersonaDeportesDto dto)
+        {
+            try
+            {
+                await _service.AsociarDeportesAsync(id, dto.DeportesIds);
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
 }

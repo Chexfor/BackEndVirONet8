@@ -62,8 +62,19 @@ namespace BackEndVirONet8.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _service.EliminarAsync(id);
-            return NoContent();
+            try
+            {
+                await _service.EliminarAsync(id);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
         }
     }
 }

@@ -1,5 +1,7 @@
 using BackEndVirONet8.Domain.Entities;
 using BackEndVirONet8.Infrastructure.Repositories;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BackEndVirONet8.Infrastructure.Implementations
 {
@@ -30,6 +32,28 @@ namespace BackEndVirONet8.Infrastructure.Implementations
             return await _repo.GetByIdAsync(id);
         }
 
+        public async Task<PersonaDto?> ObtenerDtoPorIdAsync(int id)
+        {
+            var persona = await _repo.GetByIdAsync(id);
+            if (persona == null) return null;
+
+            return new PersonaDto
+            {
+                Id = persona.Id,
+                Nombre = persona.Nombre,
+                PrimerApellido = persona.PrimerApellido,
+                SegundoApellido = persona.SegundoApellido,
+                FechaNacimiento = persona.FechaNacimiento,
+                Sexo = persona.Sexo,
+                Deportes = persona.PersonaDeportes
+                    .Select(pd => new DeporteDto
+                    {
+                        Id = pd.DeporteId,
+                        Nombre = pd.Deporte.Nombre
+                    }).ToList()
+            };
+        }
+
         public async Task CrearAsync(Persona persona)
         {
             // Validación ejemplo: nombre requerido y longitud
@@ -51,6 +75,28 @@ namespace BackEndVirONet8.Infrastructure.Implementations
         public async Task EliminarAsync(int id)
         {
             await _repo.DeleteAsync(id);
+        }
+
+        public async Task AsociarDeportesAsync(int personaId, List<int> deportesIds)
+        {
+            var persona = await _repo.GetByIdAsync(personaId);
+            if (persona == null)
+                throw new ArgumentException("Persona no encontrada.");
+
+            // Limpia relaciones actuales
+            persona.PersonaDeportes.Clear();
+
+            // Asocia nuevos deportes solo con los IDs
+            foreach (var deporteId in deportesIds.Distinct())
+            {
+                persona.PersonaDeportes.Add(new PersonaDeporte
+                {
+                    PersonaId = personaId,
+                    DeporteId = deporteId
+                });
+            }
+
+            await _repo.UpdateAsync(persona);
         }
     }
 }
