@@ -1,6 +1,7 @@
 using BackEndVirONet8.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using BackEndVirONet8.Infrastructure.Repositories;
+using BackEndVirONet8.Infrastructure.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IPersonaRepository, PersonaRepository>();
 builder.Services.AddScoped<IDeporteRepository, DeporteRepository>();
+builder.Services.AddScoped<DeporteService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowBlazor", policy =>
@@ -32,4 +34,20 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+        var result = System.Text.Json.JsonSerializer.Serialize(new { error = ex.Message });
+        await context.Response.WriteAsync(result);
+    }
+});
+
 app.Run();

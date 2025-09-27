@@ -1,22 +1,62 @@
+using BackEndVirONet8.Domain.Entities;
+using BackEndVirONet8.Infrastructure.Implementations;
 using Microsoft.AspNetCore.Mvc;
 
-
-[Route("api/[controller]")]
-public class PersonasController : ControllerBase
+namespace BackEndVirONet8.Controllers
 {
-    private readonly PersonaService _service;
-
-    public PersonasController(PersonaService service)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class PersonasController : ControllerBase
     {
-        _service = service;
-    }
+        private readonly PersonaService _service;
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var personas = await _service.ListarPersonasAsync();
-        return Ok(personas);
-    }
+        public PersonasController(PersonaService service)
+        {
+            _service = service;
+        }
 
-    // Agrega endpoints para GetById, Create, Update, Delete    
+        [HttpGet]
+        public async Task<IActionResult> Get([FromQuery] string? filtro, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var personas = await _service.ListarAsync(filtro, page, pageSize);
+            return Ok(personas);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var persona = await _service.ObtenerPorIdAsync(id);
+            if (persona == null) return NotFound();
+            return Ok(persona);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] Persona persona)
+        {
+            try
+            {
+                await _service.CrearAsync(persona);
+                return CreatedAtAction(nameof(Get), new { id = persona.Id }, persona);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(int id, [FromBody] Persona persona)
+        {
+            if (id != persona.Id) return BadRequest();
+            await _service.ActualizarAsync(persona);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _service.EliminarAsync(id);
+            return NoContent();
+        }
+    }
 }
