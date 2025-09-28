@@ -1,0 +1,267 @@
+﻿@page "/personas"
+@using FrontEndVirOBlazorAsamblin.Services
+@using FrontEndVirOBlazorAsamblin.Models
+@inject PersonaService PersonaService
+@inject DeporteService DeporteService
+@inject IJSRuntime JS
+
+<h3 class="mb-4">👥 Gestión de Personas</h3>
+
+<button class="btn btn-success mb-3" @onclick="AbrirModalNuevo">
+    <i class="bi bi-person-plus"></i> Agregar Persona
+</button>
+
+@if (personas == null)
+{
+    <p>Cargando personas...</p>
+}
+else
+{
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Fecha Nacimiento</th>
+                <th>Sexo</th>
+                <th>Deportes</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in personas)
+            {
+                <tr>
+                    <td>@p.Id</td>
+                    <td>@p.Nombre @p.PrimerApellido</td>
+                    <td>@p.FechaNacimiento.ToShortDateString()</td>
+                    <td>@(p.Sexo == 1 ? "Hombre" : "Mujer")</td>
+                    <td>
+                        @foreach (var d in p.Deportes)
+                        {
+                            <span class="badge bg-info me-1">@d.Nombre</span>
+                        }
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => AbrirModalEditar(p)">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger me-1" @onclick="() => Eliminar(p.Id)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<!-- Modal -->
+<div class="modal fade" id="modalPersona" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <EditForm Model="personaForm" OnValidSubmit="Guardar">
+                <DataAnnotationsValidator />
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">@((editando ? "Editar" : "Agregar") + " Persona")</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <InputText class="form-control" @bind-Value="personaForm.Nombre" />
+                        <ValidationMessage For="@(() => personaForm.Nombre)" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Primer Apellido</label>
+                        <InputText class="form-control" @bind-Value="personaForm.PrimerApellido" />
+                        <ValidationMessage For="@(() => personaForm.PrimerApellido)" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Segundo Apellido</label>
+                        <InputText class="form-control" @bind-Value="personaForm.SegundoApellido" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fecha de Nacimiento</label>
+                        <InputDate class="form-control" @bind-Value="personaForm.FechaNacimiento" />
+                        <ValidationMessage For="@(() => personaForm.FechaNacimiento)" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sexo</label>
+                        <InputSelect class="form-select" @bind-Value="personaForm.Sexo">
+                            <option value="1">Hombre</option>
+                            <option value="2">Mujer</option>
+                        </InputSelect>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Deportes</label>
+                        @if (deportesVM != null && deportesVM.Any())
+                        {
+                            @foreach (var d in deportesVM)
+                            {
+                                <div class="form-check" @key="d.Id">
+                                    <InputCheckbox class="form-check-input" @bind-Value="d.IsSelected" />
+                                    <label class="form-check-label">@d.Nombre</label>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted">No hay deportes disponibles.</p>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Guardar
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    // ViewModel para selección segura (no se pierden Ids)
+    public class DeporteSelectable
+    {
+        public int Id { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public bool IsSelected { get; set; }
+    }
+
+    List<PersonaDto>? personas;
+    List<DeporteDto>? todosLosDeportes;
+    List<DeporteSelectable>? deportesVM;
+
+    // Usa el DTO de creación para POST/PUT (coincide con tu backend)
+    PersonaCreateDto personaForm = new();
+    bool editando = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarPersonas();
+        todosLosDeportes = await DeporteService.GetAllAsync();
+    }
+
+    async Task CargarPersonas()
+    {
+        personas = await PersonaService.GetAllAsync();
+    }
+
+    async Task AbrirModalNuevo()
+    {
+        if (todosLosDeportes == null || !todosLosDeportes.Any())
+            todosLosDeportes = await DeporteService.GetAllAsync();
+
+        personaForm = new PersonaCreateDto
+        {
+            Sexo = 1,
+            FechaNacimiento = DateTime.Today
+        };
+
+        // Inicializa la VM con todos los deportes sin seleccionar
+        deportesVM = todosLosDeportes
+            .Select(d => new DeporteSelectable { Id = d.Id, Nombre = d.Nombre, IsSelected = false })
+            .ToList();
+
+        editando = false;
+        await MostrarModal();
+    }
+
+    async Task AbrirModalEditar(PersonaDto p)
+    {
+        if (todosLosDeportes == null || !todosLosDeportes.Any())
+            todosLosDeportes = await DeporteService.GetAllAsync();
+
+        // Rellena el formulario con los campos editables
+        personaForm = new PersonaCreateDto
+        {
+            Id = p.Id,
+            Nombre = p.Nombre,
+            PrimerApellido = p.PrimerApellido,
+            SegundoApellido = p.SegundoApellido,
+            FechaNacimiento = p.FechaNacimiento,
+            Sexo = p.Sexo
+        };
+
+        var seleccionados = p.Deportes.Select(x => x.Id).ToHashSet();
+
+        // Inicializa la VM marcando los deportes ya asociados
+        deportesVM = todosLosDeportes
+            .Select(d => new DeporteSelectable
+            {
+                Id = d.Id,
+                Nombre = d.Nombre,
+                IsSelected = seleccionados.Contains(d.Id)
+            })
+            .ToList();
+
+        editando = true;
+        await MostrarModal();
+    }
+
+    async Task Guardar()
+    {
+        // Construye la lista de IDs seleccionados desde la VM
+        var deportesSeleccionados = (deportesVM ?? new())
+            .Where(x => x.IsSelected)
+            .Select(x => x.Id)
+            .ToList();
+
+        bool ok;
+
+        if (editando)
+        {
+            ok = await PersonaService.UpdateAsync(personaForm.Id, personaForm);
+        }
+        else
+        {
+            // Recomendado: crear y recuperar el ID para asociar deportes
+            var created = await PersonaService.CreateAndReturnDtoAsync(personaForm);
+            if (created == null)
+            {
+                await JS.InvokeVoidAsync("alert", "Error al crear la persona.");
+                return;
+            }
+            personaForm.Id = created.Id;
+            ok = true;
+        }
+
+        if (ok)
+        {
+            // Asocia deportes usando el ID seguro del formulario (ya establecido)
+            await PersonaService.AsignarDeporte(personaForm.Id, deportesSeleccionados);
+            await CargarPersonas();
+            await OcultarModal();
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", "Error al guardar la persona.");
+        }
+    }
+
+    async Task Eliminar(int id)
+    {
+        var confirmado = await JS.InvokeAsync<bool>("confirm", $"¿Eliminar persona con ID {id}?");
+        if (confirmado)
+        {
+            var ok = await PersonaService.DeleteAsync(id);
+            if (ok)
+                await CargarPersonas();
+        }
+    }
+
+    async Task MostrarModal()
+    {
+        await JS.InvokeVoidAsync("bootstrapInterop.showModal", "#modalPersona");
+    }
+
+    async Task OcultarModal()
+    {
+        await JS.InvokeVoidAsync("bootstrapInterop.hideModal", "#modalPersona");
+    }
+}
