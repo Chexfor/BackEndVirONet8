@@ -50,5 +50,26 @@ namespace BackEndVirONet8.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task DeleteAllAsync(int id)
+        {
+            // Verifica si el deporte existe
+            var deporte = await _context.Deportes
+                .Include(d => d.PersonaDeportes)
+                .FirstOrDefaultAsync(d => d.Id == id);
+
+            if (deporte == null)
+                throw new ArgumentException("Deporte no encontrado.");
+
+            // Elimina todas las relaciones PersonaDeporte asociadas
+            if (deporte.PersonaDeportes != null && deporte.PersonaDeportes.Any())
+            {
+                _context.PersonaDeportes.RemoveRange(deporte.PersonaDeportes);
+                await _context.SaveChangesAsync();
+            }
+
+            // Elimina el deporte
+            _context.Deportes.Remove(deporte);
+            await _context.SaveChangesAsync();
+        }
     }
 }

@@ -7,16 +7,16 @@ namespace BackEndVirONet8.Infrastructure.Implementations
 {
     public class PersonaService
     {
-        private readonly IPersonaRepository _repo;
+        private readonly IPersonaRepository _repoDeporte;
 
         public PersonaService(IPersonaRepository repo)
         {
-            _repo = repo;
+            _repoDeporte = repo;
         }
 
         public async Task<List<Persona>> ListarAsync(string? filtro = null, int page = 1, int pageSize = 10)
         {
-            var query = _repo.GetAllAsync().Result.AsQueryable();
+            var query = _repoDeporte.GetAllAsync().Result.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(filtro))
                 query = query.Where(p => p.Nombre.Contains(filtro) || p.PrimerApellido.Contains(filtro) || (p.SegundoApellido != null && p.SegundoApellido.Contains(filtro)));
@@ -29,12 +29,12 @@ namespace BackEndVirONet8.Infrastructure.Implementations
 
         public async Task<Persona?> ObtenerPorIdAsync(int id)
         {
-            return await _repo.GetByIdAsync(id);
+            return await _repoDeporte.GetByIdAsync(id);
         }
 
         public async Task<PersonaDto?> ObtenerDtoPorIdAsync(int id)
         {
-            var persona = await _repo.GetByIdAsync(id);
+            var persona = await _repoDeporte.GetByIdAsync(id);
             if (persona == null) return null;
 
             return new PersonaDto
@@ -64,22 +64,22 @@ namespace BackEndVirONet8.Infrastructure.Implementations
             if (persona.FechaNacimiento < new DateTime(1900, 1, 1) || persona.FechaNacimiento > DateTime.Today)
                 throw new ArgumentException("La fecha de nacimiento debe estar entre 1900 y hoy.");
 
-            await _repo.AddAsync(persona);
+            await _repoDeporte.AddAsync(persona);
         }
 
         public async Task ActualizarAsync(Persona persona)
         {
-            await _repo.UpdateAsync(persona);
+            await _repoDeporte.UpdateAsync(persona);
         }
 
         public async Task EliminarAsync(int id)
         {
-            await _repo.DeleteAsync(id);
+            await _repoDeporte.DeleteAsync(id);
         }
 
         public async Task AsociarDeportesAsync(int personaId, List<int> deportesIds)
         {
-            var persona = await _repo.GetByIdAsync(personaId);
+            var persona = await _repoDeporte.GetByIdAsync(personaId);
             if (persona == null)
                 throw new ArgumentException("Persona no encontrada.");
 
@@ -96,7 +96,7 @@ namespace BackEndVirONet8.Infrastructure.Implementations
                 });
             }
 
-            await _repo.UpdateAsync(persona);
+            await _repoDeporte.UpdateAsync(persona);
         }
     }
 }

@@ -9,5 +9,11 @@ namespace BackEndVirONet8.Domain.Entities
         public string Nombre { get; set; } = default!;
         public ICollection<PersonaDeporte> PersonaDeportes { get; set; } = new List<PersonaDeporte>();
     }
+    public class DeporteIn
+    {
+        public int Id { get; set; }
+        [Required, StringLength(100, MinimumLength = 2)]
+        public string Nombre { get; set; } = default!;
+    }
 
 }

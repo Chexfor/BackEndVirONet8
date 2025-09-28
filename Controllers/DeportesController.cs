@@ -31,11 +31,17 @@ namespace BackEndVirONet8.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] Deporte deporte)
+        public async Task<IActionResult> Post([FromBody] DeporteIn deporte)
         {
             try
             {
-                await _service.CrearAsync(deporte);
+                Deporte deporteToUpdate = new Deporte
+                {
+                    Id = deporte.Id,
+                    Nombre = deporte.Nombre
+                };
+                
+                await _service.CrearAsync(deporteToUpdate);
                 return CreatedAtAction(nameof(Get), new { id = deporte.Id }, deporte);
             }
             catch (ArgumentException ex)
@@ -45,12 +51,17 @@ namespace BackEndVirONet8.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Deporte deporte)
+        public async Task<IActionResult> Put(int id, [FromBody] DeporteIn deporte)
         {
             if (id != deporte.Id) return BadRequest();
             try
             {
-                await _service.ActualizarAsync(deporte);
+                Deporte deporteToUpdate = new Deporte
+                {
+                    Id = deporte.Id,
+                    Nombre = deporte.Nombre
+                };
+                await _service.ActualizarAsync(deporteToUpdate);
                 return NoContent();
             }
             catch (ArgumentException ex)
@@ -59,12 +70,30 @@ namespace BackEndVirONet8.Controllers
             }
         }
 
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> Delete(int id)
+        //{
+        //    try
+        //    {
+        //        await _service.EliminarAsync(id);
+        //        return NoContent();
+        //    }
+        //    catch (InvalidOperationException ex)
+        //    {
+        //        return BadRequest(new { error = ex.Message });
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return NotFound(new { error = ex.Message });
+        //    }
+        //}
+
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteAll(int id)
         {
             try
             {
-                await _service.EliminarAsync(id);
+                await _service.EliminarAllAsync(id);
                 return NoContent();
             }
             catch (InvalidOperationException ex)

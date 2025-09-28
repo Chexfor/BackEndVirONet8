@@ -8,5 +8,6 @@ namespace BackEndVirONet8.Infrastructure.Repositories
         Task AddAsync(Persona persona);
         Task UpdateAsync(Persona persona);
         Task DeleteAsync(int id);
+        Task DeleteAllAsync(int id);
     }
 }
