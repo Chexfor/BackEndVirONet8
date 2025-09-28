@@ -24,6 +24,7 @@ namespace BackEndVirONet8.Domain.Entities
         [Required]
         public Sexo Sexo { get; set; }
 
-        public ICollection<PersonaDeporte> PersonaDeportes { get; set; }
+        public ICollection<PersonaDeporte?> PersonaDeportes { get; set; }
     }
+    
 }

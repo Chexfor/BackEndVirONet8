@@ -1,3 +1,4 @@
+using AutoMapper;
 using BackEndVirONet8.Domain.Entities;
 using BackEndVirONet8.Infrastructure.Implementations;
 using Microsoft.AspNetCore.Mvc;
@@ -9,17 +10,20 @@ namespace BackEndVirONet8.Controllers
     public class DeportesController : ControllerBase
     {
         private readonly DeporteService _service;
+        private readonly IMapper _mapper;
 
-        public DeportesController(DeporteService service)
+        public DeportesController(DeporteService service, IMapper mapper)
         {
             _service = service;
+            _mapper = mapper;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
             var deportes = await _service.ListarAsync();
-            return Ok(deportes);
+            var dtoList = _mapper.Map<List<DeporteDto>>(deportes);
+            return Ok(dtoList);
         }
 
         [HttpGet("{id}")]
@@ -27,22 +31,21 @@ namespace BackEndVirONet8.Controllers
         {
             var deporte = await _service.ObtenerPorIdAsync(id);
             if (deporte == null) return NotFound();
-            return Ok(deporte);
+
+            var dto = _mapper.Map<DeporteDto>(deporte);
+            return Ok(dto);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] DeporteIn deporte)
+        public async Task<IActionResult> Post([FromBody] DeporteDto dto)
         {
             try
             {
-                Deporte deporteToUpdate = new Deporte
-                {
-                    Id = deporte.Id,
-                    Nombre = deporte.Nombre
-                };
-                
-                await _service.CrearAsync(deporteToUpdate);
-                return CreatedAtAction(nameof(Get), new { id = deporte.Id }, deporte);
+                var deporte = _mapper.Map<Deporte>(dto);
+                await _service.CrearAsync(deporte);
+
+                var resultDto = _mapper.Map<DeporteDto>(deporte);
+                return CreatedAtAction(nameof(Get), new { id = deporte.Id }, resultDto);
             }
             catch (ArgumentException ex)
             {
@@ -51,17 +54,14 @@ namespace BackEndVirONet8.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] DeporteIn deporte)
+        public async Task<IActionResult> Put(int id, [FromBody] DeporteDto dto)
         {
-            if (id != deporte.Id) return BadRequest();
+            if (id != dto.Id) return BadRequest();
+
             try
             {
-                Deporte deporteToUpdate = new Deporte
-                {
-                    Id = deporte.Id,
-                    Nombre = deporte.Nombre
-                };
-                await _service.ActualizarAsync(deporteToUpdate);
+                var deporte = _mapper.Map<Deporte>(dto);
+                await _service.ActualizarAsync(deporte);
                 return NoContent();
             }
             catch (ArgumentException ex)
@@ -69,24 +69,6 @@ namespace BackEndVirONet8.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
-
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //    try
-        //    {
-        //        await _service.EliminarAsync(id);
-        //        return NoContent();
-        //    }
-        //    catch (InvalidOperationException ex)
-        //    {
-        //        return BadRequest(new { error = ex.Message });
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return NotFound(new { error = ex.Message });
-        //    }
-        //}
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAll(int id)

@@ -1,3 +1,4 @@
+using AutoMapper;
 using BackEndVirONet8.Domain.Entities;
 using BackEndVirONet8.Infrastructure.Implementations;
 using Microsoft.AspNetCore.Mvc;
@@ -9,42 +10,42 @@ namespace BackEndVirONet8.Controllers
     public class PersonasController : ControllerBase
     {
         private readonly PersonaService _service;
+        private readonly IMapper _mapper;
 
-        public PersonasController(PersonaService service)
+        public PersonasController(PersonaService service, IMapper mapper)
         {
             _service = service;
+            _mapper = mapper;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] string? filtro, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             var personas = await _service.ListarAsync(filtro, page, pageSize);
-            return Ok(personas);
+            var dtoList = _mapper.Map<List<PersonaDto>>(personas);
+            return Ok(dtoList);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            var persona = await _service.ObtenerDtoPorIdAsync(id);
+            var persona = await _service.ObtenerPorIdAsync(id);
             if (persona == null) return NotFound();
-            return Ok(persona);
+
+            var dto = _mapper.Map<PersonaDto>(persona);
+            return Ok(dto);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] PersonaCreateDto dto)
+        public async Task<IActionResult> Post([FromBody] PersonaDto dto)
         {
             try
             {
-                var persona = new Persona
-                {
-                    Nombre = dto.Nombre,
-                    PrimerApellido = dto.PrimerApellido,
-                    SegundoApellido = dto.SegundoApellido,
-                    FechaNacimiento = dto.FechaNacimiento,
-                    Sexo = dto.Sexo
-                };
+                var persona = _mapper.Map<Persona>(dto);
                 await _service.CrearAsync(persona);
-                return CreatedAtAction(nameof(Get), new { id = persona.Id }, persona);
+
+                var resultDto = _mapper.Map<PersonaDto>(persona);
+                return CreatedAtAction(nameof(Get), new { id = persona.Id }, resultDto);
             }
             catch (ArgumentException ex)
             {
@@ -53,9 +54,11 @@ namespace BackEndVirONet8.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Persona persona)
+        public async Task<IActionResult> Put(int id, [FromBody] PersonaDto dto)
         {
-            if (id != persona.Id) return BadRequest();
+            var persona = _mapper.Map<Persona>(dto);
+            persona.Id = id;
+
             await _service.ActualizarAsync(persona);
             return NoContent();
         }
